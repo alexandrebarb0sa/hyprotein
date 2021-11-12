@@ -31,3 +31,17 @@ simulation = {
 }
 
 hyp.simulation.workspace(simulation)
+
+p = dict()
+
+for pdb in simulation['proteins']['pdbs']:
+    p.update({
+        pdb:hyp.Protein(
+            name=pdb,
+            path=simulation['proteins']['path'],
+            lib='biopython'
+        )
+    })    
+
+
+print(p['1vii'].structure )

@@ -1,4 +1,6 @@
-class Protein:
+from .PDBObject import PDBobject
+
+class Protein(PDBobject):
     '''
     Protein class
 
@@ -12,4 +14,5 @@ class Protein:
     '''
 
     def __init__(self,name,path,lib,pdb_format='pdb'):
-        ...
+        super().__init__(name,path,lib,pdb_format)        
+        self.structure = self.get_structure()
