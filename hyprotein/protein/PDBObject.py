@@ -10,7 +10,7 @@ class PDBobject:
 
     def get_structure(self):
         PDBlib = self.parse_lib()
-        return PDBstructure(PDBlib)
+        return PDBstructure(self.name,PDBlib)
 
     def parse_lib(self):
         if self.lib == "biopython":

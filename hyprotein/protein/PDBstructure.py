@@ -1,8 +1,14 @@
-class PDBstructure:
-    def __init__(self,PDBlib):
+from hyprotein.protein.IPDBstructure import IPDBstructure
+
+class PDBstructure(IPDBstructure):
+    def __init__(self,name,PDBlib):
         self.__PDBlib = PDBlib
-        self.__PDBlib.get_structure()
-        self.name = self.__PDBlib.name.upper()
+        self.name = name
+    def show(self):
+        return 
+
+    def dihedrals(self):
+        return self.__PDBlib.dihedrals()
 
 
 class PDBresidues:

@@ -1,8 +1,12 @@
+from Bio import __version__ as Bio_version
 from Bio.PDB import PDBList, Selection, Polypeptide, vectors
 from Bio.PDB.PDBParser import PDBParser
 
-class Biopython(object):
+from hyprotein.protein.PDBstructure import PDBstructure
+
+class Biopython(PDBstructure):
     def __init__(self,name,path,pdb_format) -> None:
+        self.info = ['Biopython',Bio_version]
         self.name = name
         self.path = f"{path}{name}.{pdb_format}"
 
@@ -19,3 +23,9 @@ class Biopython(object):
     def residues(self,chain):
         r = {c:None for c in list(self.__chains.keys())}
         return r
+
+    def show(self):
+        ...
+
+    def dihedrals(self):
+        ...
