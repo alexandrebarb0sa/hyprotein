@@ -1,0 +1,8 @@
+docs
+.vscode
+*.ipynb 
+*.pyc
+*.sh
+*.dat
+simulations*
+**/__pycache__
