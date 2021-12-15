@@ -33,9 +33,9 @@ class PDBstructure(IPDBstructure):
         """
         dihedrals() method
         """
-        p = PDB.get(self.name)
-        p = p.lib.dihedrals()
-        print(p)
+        pdb = PDB.get(self.name).lib
+        pdb = pdb.dihedrals()
+        print(pdb)
         return ''
 
 

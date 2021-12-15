@@ -1,6 +1,9 @@
+import pandas as pd
+import numpy as np
 from Bio import __version__ as Bio_version
 from Bio.PDB import PDBList, Selection, Polypeptide, vectors
 from Bio.PDB.PDBParser import PDBParser
+from pandas.core.algorithms import value_counts
 
 from hyprotein.protein.interfaces import IPDBstructure
 
@@ -11,7 +14,7 @@ class Biopython(IPDBstructure):
         self.name = lib
         self.path = f"{path}{self.protein}.{pdb_format}"
         self.pdb = self.PDB.pdb(self.protein, self.path)
-        self.residues = self.PDB.residues(self.pdb.lib)
+        self.residues = self.PDB.residues(self.pdb)
 
     def show(self):
         p,protein,pdb = self.pdb.unpack()
@@ -22,30 +25,38 @@ class Biopython(IPDBstructure):
         return p
 
     def dihedrals(self):
-        d = dict()
-        p,protein,pdb = self.pdb.unpack()
+        protein,name,pdb = self.pdb.unpack()
+    
+        chains = list(protein[name].keys())
+    
+        for chain in chains:
+            protein[name][chain] = {res.id[1]:res.resname for res in protein[name][chain]}
 
-        for chains in pdb.get_chains():
-            chain = chains.id
-            p[protein][chain] = {}
-            for res in pdb.get_residues():
-                resname = res.resname
-                id = res.id[1]
+        idx = {chain:None for chain in chains}
+        res = {chain:None for chain in chains}
 
-                phi = res.internal_coord.get_angle('phi')
-                phi = round(phi, 5) if phi else None
+        for chain in chains:
+            id = protein[name][chain].keys()
+            res[chain] = protein[name][chain].values()
 
-                psi = res.internal_coord.get_angle('psi')
-                psi = round(psi, 5) if psi else None
+            idx[chain] = pd.MultiIndex.from_product([list(chain),id])
 
-                p[protein][chain].update({
-                    (id,resname): {
-                        'phi': phi,
-                        'psi': psi
-                    }
-                })
+            idx[chain] = [
+                (name,) + x for x in idx[chain].values
+            ]
 
-        return p
+            idx[chain] = pd.Index(idx[chain])
+
+        idx = idx.values()
+        idx = [item for chain in idx for item in chain]
+        idx = pd.Index(idx, name=('PROTEIN','CHAIN','RES_ID'))
+
+        res = res.values()
+        res = [item for residue in res for item in residue]
+
+        df = pd.DataFrame(data=res,columns=['RESIDUE'],index=idx)
+
+        return df
 
     class PDB:
         def __init__(self, *args, **kwargs) -> None:
@@ -53,37 +64,40 @@ class Biopython(IPDBstructure):
                 setattr(self, key, kwargs[key])
 
         @classmethod
-        def pdb(cls, protein, path):
-            pdb = PDBParser().get_structure(protein, path)[0]
+        def pdb(cls, name, path):
+            pdb = PDBParser().get_structure(name, path)[0]
             pdb.atom_to_internal_coordinates()
-            chains = pdb.get_chains()
 
-            to_dict = {
-                protein: {
-                    chain.id: None for chain in chains
+            protein = {
+                name: {
+                    chain.id: None for chain in list(pdb.get_chains())
                 }
             }
+            
+            for chain in pdb.get_chains():
+                protein[name][chain.id] = list(chain.get_residues())
 
             def unpack():
                 """unpack() method returns a tuple with three values:
 
-                protein: protein's name
-                to_dict: dictionary structure of protein
+                name: protein's name
+                protein: dictionary structure of protein
                 pdb: biopython PDB object
 
                 """
-                return (to_dict,protein,pdb)
+                return (protein.copy(),name,pdb)
 
             attr = {
+                'name': name,
                 'protein': protein,
-                'lib': pdb,
-                'to_dict': to_dict,
+                'lib':pdb,
                 'unpack':unpack
             }
             return cls(**attr)
 
         @classmethod
         def residues(cls, pdb):
+            pdb = pdb.lib
             residues = list(pdb.get_residues())
             total = len(residues)
             attr = {
