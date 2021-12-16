@@ -26,7 +26,7 @@ class PDBparser:
     def __init__(self) -> None:
         self.__protein = {}
 
-    def parser(self,ref,name,path,pdb_format,lib):
+    def parser(self,name,path,pdb_format,lib):
         params = {
             'name':name,
             'path':path,

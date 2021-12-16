@@ -7,29 +7,27 @@ class PDBstructure(IPDBstructure):
     PDBstructure class
     """
 
-    def __init__(self):
-        pdb = PDB.get()
-        self.name = pdb.name
-        self.residues = PDBresidues.info(pdb)
+    def __init__(self,pdb):
+        self.pdb = pdb
+        # self.residues = PDBresidues.info(pdb)
 
     def show(self):
         """
-        show() method
+        .show() method
         """
-        protein = PDB.get(self.name).lib.show()
+        protein = self.pdb.lib.show()
         view = PDBview(protein).pandas()
 
         return view
        
     def dihedrals(self):
         """
-        dihedrals() method
+        .dihedrals() method
         """
-        pdb = PDB.get(self.name).lib
-        pdb = pdb.dihedrals()
-        print(pdb)
-        return ''
+        protein = self.pdb.lib.dihedrals()
+        view = PDBview(protein).pandas()
 
+        return view
 
 class PDBresidues:
     """
@@ -67,16 +65,17 @@ class PDBresidues:
 class PDBview:
     def __init__(self,protein) -> None:
         self.protein = protein
+        self.name = list(self.protein.keys())[0]
 
     def to_dict(self):
         if isinstance(self.protein,dict):
             return self.protein
         
     def pandas(self):
-
-        protein,name = self.protein,list(self.protein.keys())[0]
-
+        protein,name = self.protein,self.name
+        # protein[name].update({'B':dict(list(protein[name]['A'].items())[0:5])})
         chains = list(protein[name].keys())
+        columns = list(list(protein[name][chains[0]].values())[0].keys())
 
         idx = {chain:None for chain in chains}
         res = {chain:None for chain in chains}
@@ -98,9 +97,11 @@ class PDBview:
         idx = pd.Index(idx, name=('PROTEIN','CHAIN','RES_ID'))
 
         res = res.values()
-        res = [item for residue in res for item in residue]
 
-        df = pd.DataFrame(data=res,columns=['RESIDUE'],index=idx)
+        data = [item for residues in res for item in residues]
+        data = [d.values() for d in data]
+
+        df = pd.DataFrame(data=data,columns=columns,index=idx)
 
         return df
         

@@ -37,13 +37,11 @@ p = dict()
 for pdb in simulation['proteins']['pdbs']:
     p.update({
         pdb:hyp.Protein(
-            name=pdb,
+            protein=pdb,
             path=simulation['proteins']['path'],
             lib='biopython'
         )
     })    
 
 
-print(p['1vii'].structure.show() )
-
-# a = p['1vii'].structure.show()['1vii']['A'][0]
+print(p['1vii'].structure.dihedrals() )

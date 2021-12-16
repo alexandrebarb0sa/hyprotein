@@ -15,17 +15,17 @@ class Protein:
     :type pdb_format: str
     """
 
-    def __init__(self,name:str,path,lib,pdb_format='pdb'):
+    def __init__(self,protein:str,path,lib,pdb_format='pdb'):
         """
         Parameters
         ---
-        name:   str
-            Protein name
+        protein:   str
+            Protein protein
         """
-        self.name : str = name
+        self.name:str = protein
         self.path = path
         self.pdb_format = pdb_format 
         self.lib = lib
-        PDB.parser(self,name,path,pdb_format,lib)
-        self.structure = PDBstructure()
+        PDB.parser(protein,path,pdb_format,lib)
+        self.structure = PDBstructure(PDB.get(protein))
 
