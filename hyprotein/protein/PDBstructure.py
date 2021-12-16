@@ -16,19 +16,11 @@ class PDBstructure(IPDBstructure):
         """
         show() method
         """
-        pdb = PDB.get(self.name)
-        name = pdb.name
-        p = pdb.lib.show()
+        protein = PDB.get(self.name).lib.show()
+        view = PDBview(protein).pandas()
 
-        chains = p[name].keys()
-
-        for chain in chains:
-            count = 0
-            for res_id,resname in p[name][chain].items():
-                p[name][chain][res_id] = PDBresidues.residue(resname, res_id)
-                count += 1
-        return p
-
+        return view
+       
     def dihedrals(self):
         """
         dihedrals() method
@@ -71,3 +63,44 @@ class PDBresidues:
             return f"<hyProtein {self.resname} ID: {self.id}>"
         elif hasattr(self, 'protein'):
             return f"<hyProtein {self.protein.upper()} Residues: {self.total}>"
+
+class PDBview:
+    def __init__(self,protein) -> None:
+        self.protein = protein
+
+    def to_dict(self):
+        if isinstance(self.protein,dict):
+            return self.protein
+        
+    def pandas(self):
+
+        protein,name = self.protein,list(self.protein.keys())[0]
+
+        chains = list(protein[name].keys())
+
+        idx = {chain:None for chain in chains}
+        res = {chain:None for chain in chains}
+
+        for chain in chains:
+            id = protein[name][chain].keys()
+            res[chain] = protein[name][chain].values()
+
+            idx[chain] = pd.MultiIndex.from_product([list(chain),id])
+
+            idx[chain] = [
+                (name,) + x for x in idx[chain].values
+            ]
+
+            idx[chain] = pd.Index(idx[chain])
+
+        idx = idx.values()
+        idx = [item for chain in idx for item in chain]
+        idx = pd.Index(idx, name=('PROTEIN','CHAIN','RES_ID'))
+
+        res = res.values()
+        res = [item for residue in res for item in residue]
+
+        df = pd.DataFrame(data=res,columns=['RESIDUE'],index=idx)
+
+        return df
+        

@@ -1,5 +1,3 @@
-import pandas as pd
-import numpy as np
 from Bio import __version__ as Bio_version
 from Bio.PDB import PDBList, Selection, Polypeptide, vectors
 from Bio.PDB.PDBParser import PDBParser
@@ -17,46 +15,17 @@ class Biopython(IPDBstructure):
         self.residues = self.PDB.residues(self.pdb)
 
     def show(self):
-        p,protein,pdb = self.pdb.unpack()
+        protein,name,pdb = self.pdb.unpack()
+    
         chains = pdb.get_chains()
         for chain in chains:
             residues = list(chain.get_residues())
-            p[protein][chain.id] = {res.id[1]:res.resname for res in residues}
-        return p
+            protein[name][chain.id] = {res.id[1]:res.resname for res in residues}
+        return protein
 
     def dihedrals(self):
-        protein,name,pdb = self.pdb.unpack()
-    
-        chains = list(protein[name].keys())
-    
-        for chain in chains:
-            protein[name][chain] = {res.id[1]:res.resname for res in protein[name][chain]}
+       ...
 
-        idx = {chain:None for chain in chains}
-        res = {chain:None for chain in chains}
-
-        for chain in chains:
-            id = protein[name][chain].keys()
-            res[chain] = protein[name][chain].values()
-
-            idx[chain] = pd.MultiIndex.from_product([list(chain),id])
-
-            idx[chain] = [
-                (name,) + x for x in idx[chain].values
-            ]
-
-            idx[chain] = pd.Index(idx[chain])
-
-        idx = idx.values()
-        idx = [item for chain in idx for item in chain]
-        idx = pd.Index(idx, name=('PROTEIN','CHAIN','RES_ID'))
-
-        res = res.values()
-        res = [item for residue in res for item in residue]
-
-        df = pd.DataFrame(data=res,columns=['RESIDUE'],index=idx)
-
-        return df
 
     class PDB:
         def __init__(self, *args, **kwargs) -> None:
