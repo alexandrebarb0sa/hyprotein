@@ -33,13 +33,13 @@ class PDBparser:
             'pdb_format':pdb_format,
             'lib':lib
         }
-        self.__name = name
+        self.name = name
         lib = pdblib.get(params)
         self.__protein[name] = PDBobject(name,path,pdb_format,lib)
 
     def get(self,name=None):
         if not name:
-            name = self.__name
+            name = self.name
         try:
             return self.__protein[name]
         except KeyError as err:

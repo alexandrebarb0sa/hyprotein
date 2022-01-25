@@ -27,5 +27,4 @@ class Protein:
         self.pdb_format = pdb_format 
         self.lib = lib
         PDB.parser(protein,path,pdb_format,lib)
-        self.structure = PDBstructure(PDB.get(protein))
-
+        self.structure = PDBstructure()
