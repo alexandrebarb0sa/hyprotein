@@ -3,30 +3,28 @@ from Bio.PDB import PDBList, Selection, Polypeptide, vectors
 from Bio.PDB.PDBParser import PDBParser
 from pandas.core.algorithms import value_counts
 
-from hyprotein.protein.interfaces import IPDBstructure
+from hyprotein.libs.interfaces import Interface
 
-class Biopython(IPDBstructure):
+class Biopython(Interface):
     def __init__(self, name, path, pdb_format, lib) -> None:
         self.__version__ = ['Biopython', Bio_version]
         self.name = name
         self.lib = lib
         self.path = f"{path}{name}.{pdb_format}"
-        self.pdb = PDBParser().get_structure(self.name, self.path)[0]
-        self.pdb.atom_to_internal_coordinates()
+        self.biopython = PDBParser().get_structure(self.name, self.path)[0]
+        self.biopython.atom_to_internal_coordinates()
+        self.residues = self.Residues(self.biopython)
 
-        # self.pdb = self.PDB.pdb(name, self.path)
-        # self.residues = self.PDB.residues(self.pdb)
+        # self.residues.get(id,chain)
 
     def to_dict(self):
         name = self.name
-
         protein = {
             name: {
-                chain.id: None for chain in list(self.pdb.get_chains())
+                chain.id: None for chain in list(self.biopython.get_chains())
             }
-        }        
-
-        for chain in self.pdb.get_chains():
+        }
+        for chain in self.biopython.get_chains():
             c = chain.id
             residues = list(chain.get_residues())
             protein[name][c] = {res.id[1]:{'residue':res.resname} for res in residues}
@@ -39,7 +37,7 @@ class Biopython(IPDBstructure):
         protein = self.to_dict()
         name = self.name
 
-        for chain in self.pdb.get_chains():
+        for chain in self.biopython.get_chains():
             residues = chain.get_residues()
             c = chain.id
             for res in residues:
@@ -58,50 +56,22 @@ class Biopython(IPDBstructure):
 
         return protein
 
-    class PDB:
-        def __init__(self, *args, **kwargs) -> None:
-            for key in kwargs:
-                setattr(self, key, kwargs[key])
+    def set_angle(self,chain,res_id,angle_key,value):
+        self.residues.get(res_id,chain).internal_coord.set_angle(angle_key,value)
 
-        @classmethod
-        def pdb(cls, name, path):
-            pdb = PDBParser().get_structure(name, path)[0]
-            pdb.atom_to_internal_coordinates()
+    class Residues:
+        def __init__(self,biopython) -> None:
+            self.__biopython = biopython
+            self.total = len(list(self.__biopython.get_residues()))
 
-            protein = {
-                name: {
-                    chain.id: None for chain in list(pdb.get_chains())
-                }
-            }
-            
-            for chain in pdb.get_chains():
-                protein[name][chain.id] = list(chain.get_residues())
-
-            def unpack():
-                """unpack() method returns a tuple with three values:
-
-                name: protein's name
-                protein: dictionary structure of protein
-                pdb: biopython PDB object
-
-                """
-                return (protein.copy(),name,pdb)
-
-            attr = {
-                'name': name,
-                'protein': protein,
-                'lib':pdb,
-                'unpack':unpack
-            }
-            return cls(**attr)
-
-        @classmethod
-        def residues(cls, pdb):
-            pdb = pdb.lib
-            residues = list(pdb.get_residues())
-            total = len(residues)
-            attr = {
-                'total': total,
-                'list': residues,
-            }
-            return cls(**attr)
+        def constructor(self,chain,id):
+            for res in self.__biopython.child_dict[chain]:
+                if id in res.id:
+                    attr = {
+                        'resname': res.resname,
+                        'id': res.id[1],
+                        'chain': res.parent.id,
+                        # 'set_angle': res.internal_coord.set_angle,
+                        # 'get_angle': res.internal_coord.get_angle,
+                    }                                        
+                    return attr

@@ -44,6 +44,6 @@ for pdb in simulation['proteins']['pdbs']:
     })    
 
 
-print(p['1vii'].structure.show())
+print(p['1vii'].structure.residues )
 
 # p['1vii'].structure.set_angle('A',41,'phi',value=0)
