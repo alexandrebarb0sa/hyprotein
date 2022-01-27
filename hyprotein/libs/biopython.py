@@ -5,6 +5,7 @@ from pandas.core.algorithms import value_counts
 
 from hyprotein.libs.interfaces import Interface
 
+
 class Biopython(Interface):
     def __init__(self, name, path, pdb_format, lib) -> None:
         self.__version__ = ['Biopython', Bio_version]
@@ -27,7 +28,8 @@ class Biopython(Interface):
         for chain in self.biopython.get_chains():
             c = chain.id
             residues = list(chain.get_residues())
-            protein[name][c] = {res.id[1]:{'residue':res.resname} for res in residues}
+            protein[name][c] = {res.id[1]: {'residue': res.resname}
+                                for res in residues}
         return protein
 
     def show(self):
@@ -44,27 +46,28 @@ class Biopython(Interface):
                 r = res.id[1]
 
                 phi = res.internal_coord.get_angle('phi')
-                phi = round(phi,5) if isinstance(phi,float) else phi
+                phi = round(phi, 5) if isinstance(phi, float) else phi
                 psi = res.internal_coord.get_angle('psi')
-                psi = round(psi,5) if isinstance(psi,float) else psi
+                psi = round(psi, 5) if isinstance(psi, float) else psi
 
                 protein[name][c][r] = {
-                    'residue':res.resname,
+                    'residue': res.resname,
                     'phi': phi,
                     'psi': psi
                 }
 
         return protein
 
-    def set_angle(self,chain,res_id,angle_key,value):
-        self.residues.get(res_id,chain).internal_coord.set_angle(angle_key,value)
+    def set_angle(self, chain, res_id, angle_key, value):
+        self.residues.get(chain,res_id).internal_coord.set_angle(
+            angle_key, value)
 
     class Residues:
-        def __init__(self,biopython) -> None:
+        def __init__(self, biopython) -> None:
             self.__biopython = biopython
             self.total = len(list(self.__biopython.get_residues()))
 
-        def constructor(self,chain,id):
+        def repr(self, chain, id):
             for res in self.__biopython.child_dict[chain]:
                 if id in res.id:
                     attr = {
@@ -73,5 +76,10 @@ class Biopython(Interface):
                         'chain': res.parent.id,
                         # 'set_angle': res.internal_coord.set_angle,
                         # 'get_angle': res.internal_coord.get_angle,
-                    }                                        
+                    }
                     return attr
+
+        def get(self,chain,res_id):
+            for res in self.__biopython.child_dict[chain]:
+                if res_id in res.id:
+                    return res

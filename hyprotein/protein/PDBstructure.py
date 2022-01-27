@@ -32,8 +32,7 @@ class PDBstructure(Interface):
         return view
 
     def set_angle(self, chain, res_id, angle_key, value):
-        ...
-        # residue = self.pdb.lib.set_angle(res,angle)
+        self.pdb.lib.set_angle(chain,res_id,angle_key,value)
 
 
 class PDBresidues:
@@ -49,17 +48,18 @@ class PDBresidues:
         for key in kwargs:
             setattr(self, key, kwargs[key])
 
+
     def get(self):
-        protein = self.pdb.lib.to_dict()
-        name = self.pdb.name
+        name = self.protein
+        protein = PDB.get(name).lib.to_dict()
         for chain in protein[name]:
             for id,resname in protein[name][chain].items():
-                attr = self.pdb.lib.residues.constructor(chain,id)
-                protein[name][chain][id]['residue'] = self.__get_residues(attr)
+                attr = PDB.get(name).lib.residues.repr(chain, id)
+                protein[name][chain][id]['residue'] = self.__repr_residues(attr)
         return PDBview(protein).pandas()
 
     @classmethod
-    def __get_residues(cls, attr):
+    def __repr_residues(cls, attr):
         return cls(**attr)                
 
     def __repr__(self) -> str:
