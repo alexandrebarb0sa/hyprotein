@@ -1,5 +1,5 @@
-from re import A
 import pandas as pd
+from prompt_toolkit import prompt
 from ..libs.interfaces import Interface
 from .PDBobject import PDB
 
@@ -9,15 +9,15 @@ class PDBstructure(Interface):
     PDBstructure class
     """
 
-    def __init__(self):
-        self.pdb = PDB.get()
-        self.residues = PDBresidues(self.pdb)
+    def __init__(self, name):
+        self.name = name
+        self.residues = PDBresidues.info(self.name)
 
     def show(self):
         """
         .show() method
         """
-        protein = self.pdb.lib.show()
+        protein = PDB.get(self.name).lib.show()
         view = PDBview(protein).pandas()
 
         return view
@@ -26,13 +26,19 @@ class PDBstructure(Interface):
         """
         .dihedrals() method
         """
-        protein = self.pdb.lib.dihedrals()
+        protein = PDB.get(self.name).lib.dihedrals()
         view = PDBview(protein).pandas()
 
         return view
 
     def set_angle(self, chain, res_id, angle_key, value):
-        self.pdb.lib.set_angle(chain,res_id,angle_key,value)
+        PDB.get(self.name).lib.set_angle(chain, res_id, angle_key, value)
+        prompt = [f"<hyProtein:",
+                  f"{self.name.upper()}",
+                  f"Residue: {chain}-{res_id}",
+                  f"{angle_key}={value}>"
+                  ]
+        return ' '.join(prompt)
 
 
 class PDBresidues:
@@ -40,33 +46,45 @@ class PDBresidues:
     PDBresidues class
     """
 
-    def __init__(self,pdb=None,*args, **kwargs) -> None:
-        if pdb:
-            self.total = pdb.lib.residues.total
-            self.protein = pdb.name
-
+    def __init__(self, *args, **kwargs) -> None:
         for key in kwargs:
             setattr(self, key, kwargs[key])
 
+    @classmethod
+    def info(cls, name):
+        attr = {
+            'name': name,
+            'total': PDB.get(name).lib.residues.total
+        }
+        return cls(**attr)
 
     def get(self):
-        name = self.protein
+        name = self.name
         protein = PDB.get(name).lib.to_dict()
+        attr = {
+            'resname': None,
+            'id': None,
+            'chain': None,
+        }
+        attr1 = None
         for chain in protein[name]:
-            for id,resname in protein[name][chain].items():
-                attr = PDB.get(name).lib.residues.repr(chain, id)
-                protein[name][chain][id]['residue'] = self.__repr_residues(attr)
+            for id, resname in protein[name][chain].items():
+                lib_attr = PDB.get(name).lib.residues.repr(chain, id)
+                try:
+                    assert attr.keys() == lib_attr.keys()
+                    attr = dict(zip(attr, lib_attr.values()))
+                    protein[name][chain][id]['residue'] = PDBresidues(**attr)
+                except AssertionError as err:
+                    print('Attributes from lib not matching!')
+                    exit()
+                
         return PDBview(protein).pandas()
-
-    @classmethod
-    def __repr_residues(cls, attr):
-        return cls(**attr)                
 
     def __repr__(self) -> str:
         if hasattr(self, 'resname'):
             return f"<Residue {self.resname} id: {self.id}>"
         elif hasattr(self, 'total'):
-            return f"<hyProtein {self.protein.upper()} Residues: {self.total}>"
+            return f"<hyProtein {self.name.upper()} Residues: {self.total}>"
 
 
 class PDBview:

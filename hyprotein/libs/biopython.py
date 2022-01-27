@@ -74,8 +74,6 @@ class Biopython(Interface):
                         'resname': res.resname,
                         'id': res.id[1],
                         'chain': res.parent.id,
-                        # 'set_angle': res.internal_coord.set_angle,
-                        # 'get_angle': res.internal_coord.get_angle,
                     }
                     return attr
 
