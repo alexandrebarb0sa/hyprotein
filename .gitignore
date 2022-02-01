@@ -1,0 +1,10 @@
+.vscode
+*.yaml
+*.py
+*.ipynb 
+*.pyc
+*.sh
+*.dat
+hyprotein
+simulation*
+**/__pycache__
