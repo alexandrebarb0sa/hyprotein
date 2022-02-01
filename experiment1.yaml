@@ -1,0 +1,17 @@
+root: simulation
+experiment:
+  name: "experiment1"
+  analysis:
+    dir: "analysis"
+    logs:
+      - file: "log.dat"
+      - steps: 100
+  outputs:
+    dir: "outputs"  
+proteins:
+  dir: "pdbs"
+  pdbs: ['1vii','1le0','1fsd']
+MD:
+  dir: "mdp"
+  run: []
+  temperature: 298
