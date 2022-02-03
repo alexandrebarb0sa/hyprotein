@@ -9,7 +9,7 @@ experiment:
   outputs:
     dir: "outputs"  
 proteins:
-  dir: "pdbs"
+  dir: "../pdbs"
   pdbs: ['1vii','1le0','1fsd']
 MD:
   dir: "mdp"
