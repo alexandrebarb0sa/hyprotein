@@ -1,4 +1,4 @@
-# from .PDBstructure import PDBstructure
+from .PDBstructure import PDBstructure
 from .PDBobject import PDBobject
 from hyprotein import _utils
 from hyprotein.simulation import simulation
@@ -34,7 +34,7 @@ class Protein(PDBobject):
         self.lib = lib
         PDBobject.__init__(self,pdb)
 
-        # self.structure = PDBstructure(pdb)
+        self.structure = PDBstructure(pdb)
     
     def __repr__(self) -> str:
         return f"<hyProtein {self.pdb} id={self.id}>"

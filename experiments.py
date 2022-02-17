@@ -2,12 +2,11 @@ import hyprotein as hyp
 
 hyp.simulation.create('experiment1.yaml')
 
-# p = hyp.Protein(
-#     name = ['1vii'],
-#     from_lib = 'biopython',
-# )
+p = hyp.Protein(
+    pdb=['1vii','1fsd','1le0'],
+    pdb_dir='./pdbs',
+    lib='biopython'
+)
 
-hyp.Protein()
-
-import numpy
+print(p['1vii'].structure)
 
