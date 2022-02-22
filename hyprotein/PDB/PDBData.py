@@ -1,31 +1,31 @@
 import pandas as pd
 
 class PDBData:
-    def __init__(self, protein) -> None:
-        self.protein = protein
-        self.name = list(self.protein.keys())[0]
+    def __init__(self, pdb) -> None:
+        self.pdb = pdb
+        self.protein = list(self.pdb.keys())[0]
 
     def to_dict(self):
-        if isinstance(self.protein, dict):
-            return self.protein
+        if isinstance(self.pdb, dict):
+            return self.pdb
 
     def pandas(self):
-        protein, name = self.protein, self.name
-        # protein[name].update({'B':dict(list(protein[name]['A'].items())[0:5])})
-        chains = list(protein[name].keys())
-        columns = list(list(protein[name][chains[0]].values())[0].keys())
+        pdb, protein = self.pdb, self.protein
+        # pdb[protein].update({'B':dict(list(pdb[protein]['A'].items())[0:5])})
+        chains = list(pdb[protein].keys())
+        columns = list(list(pdb[protein][chains[0]].values())[0].keys())
 
         idx = {chain: None for chain in chains}
         res = {chain: None for chain in chains}
 
         for chain in chains:
-            id = protein[name][chain].keys()
-            res[chain] = protein[name][chain].values()
+            id = pdb[protein][chain].keys()
+            res[chain] = pdb[protein][chain].values()
 
             idx[chain] = pd.MultiIndex.from_product([list(chain), id])
 
             idx[chain] = [
-                (name,) + x for x in idx[chain].values
+                (protein,) + x for x in idx[chain].values
             ]
 
             idx[chain] = pd.Index(idx[chain])

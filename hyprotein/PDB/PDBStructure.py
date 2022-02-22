@@ -10,23 +10,47 @@ class Structure(PDBobject):
         self.pdb = pdb
         # self.residues = PDBresidues.info(self.name)
         PDBobject.__init__(self,pdb)
+        self.__lib = self.get_lib()
+
+    @property
+    def protein(self):
+        try:
+            if self.__protein:
+                ...
+        except AttributeError:
+            parse = self.__lib.protein
+            self._repr_residue(parse)
+        return self.__protein
+
+    def _repr_residue(self,parse):
+        protein = parse
+        pdb = self.pdb
+        chains = protein[self.pdb].keys()
+        for c in chains:
+            for res_id in protein[pdb][c]:
+                protein[pdb][c][res_id]['RESIDUE'] = PDBresidues(
+                    id=res_id,
+                    resname=protein[pdb][c][res_id]['RESIDUE'],
+                    parent=c
+                )
+        self.__protein = protein        
+        return self.__protein
 
     def show(self):
         """
-        .show() method
+        show() method
         """
-        PDB = self.get_lib()
-        protein = PDB.show()
-        view = PDBData(protein).pandas()
+        view = PDBData(self.protein).pandas()
         return view
 
     def dihedrals(self):
         """
         .dihedrals() method
         """
-        PDB = self.get_lib()
-        protein = PDB.dihedrals()
-        view = PDBData(protein).pandas()
+        parse = self.__lib.dihedrals()
+        self._repr_residue(parse)
+
+        view = PDBData(self.protein).pandas()
         return view
 
     def set_angle(self, chain, res_id, angle_key, value):
@@ -45,42 +69,26 @@ class PDBresidues:
     PDBresidues class
     """
 
-    def __init__(self, *args, **kwargs) -> None:
-        for key in kwargs:
-            setattr(self, key, kwargs[key])
+    def __init__(self, *args,**kwargs) -> None:
+        self.id = kwargs.get('id',None)
+        self.resname = kwargs.get('resname',None)
+        self.parent = kwargs.get('parent',None)
+        self.level = "R"
 
-    @classmethod
-    def info(cls, name):
-        attr = {
-            'name': name,
-            'total': PDB.get(name).lib.residues.total
-        }
-        return cls(**attr)
+    def set_phi(self):
+        ...
 
-    def get(self):
-        name = self.name
-        protein = PDB.get(name).lib.to_dict()
-        attr = {
-            'resname': None,
-            'id': None,
-            'chain': None,
-        }
-        attr1 = None
-        for chain in protein[name]:
-            for id, resname in protein[name][chain].items():
-                lib_attr = PDB.get(name).lib.residues.repr(chain, id)
-                try:
-                    assert attr.keys() == lib_attr.keys()
-                    attr = dict(zip(attr, lib_attr.values()))
-                    protein[name][chain][id]['residue'] = PDBresidues(**attr)
-                except AssertionError as err:
-                    print('Attributes from lib not matching!')
-                    exit()
+    def get_phi(self):
+        ...
 
-        return PDBData(protein).pandas()
+    def set_psi(self):
+        ...
+
+    def get_psi(self):
+        ...
+
+    def __str__(self) -> str:
+        return f"{self.resname}"
 
     def __repr__(self) -> str:
-        if hasattr(self, 'resname'):
-            return f"<Residue {self.resname} id: {self.id}>"
-        elif hasattr(self, 'total'):
-            return f"<hyProtein {self.name.upper()} Residues: {self.total}>"
+        return f"<Residue {self.resname} id: {self.id}>"

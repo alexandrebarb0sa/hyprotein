@@ -9,4 +9,3 @@ p = hyp.Protein(
 )
 
 r = p['1le0'].structure.dihedrals()
-print(type(r.loc['1le0','A',1][0]))

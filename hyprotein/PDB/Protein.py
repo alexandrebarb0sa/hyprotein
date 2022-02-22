@@ -38,4 +38,3 @@ class Protein(PDBobject):
     
     def __repr__(self) -> str:
         return f"<hyProtein {self.pdb} id={self.id}>"
-

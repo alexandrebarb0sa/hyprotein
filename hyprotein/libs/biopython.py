@@ -12,10 +12,11 @@ class Biopython(Interface):
         self.dir = f"{pdb_dir}/{pdb}{pdb_format}"
         self.lib = PDBParser().get_structure(self.pdb, self.dir)[0]
         self.lib.atom_to_internal_coordinates()
-        self.residues = self.Residues(self.lib)
+        self.residues = None
         # self.residues.get(id,chain)
 
-    def to_dict(self):
+    @property
+    def protein(self):
         pdb = self.pdb
         protein = {
             pdb: {
@@ -24,18 +25,18 @@ class Biopython(Interface):
         }
         for chain in self.lib.get_chains():
             c = chain.id
-            residues = list(chain.get_residues())
+            _residues = list(chain.get_residues())
             protein[pdb][c] = {res.id[1]: {
                 'RESIDUE': res.resname,
                 'HET': res.id[0]
-                } for res in residues}
+                } for res in _residues}
         return protein
 
     def show(self):
-        return self.to_dict()
+        ...
 
     def dihedrals(self):
-        protein = self.to_dict()
+        protein = self.protein
         pdb = self.pdb
 
         for chain in self.lib.get_chains():
