@@ -1,7 +1,6 @@
 from Bio import __version__ as Bio_version
 from Bio.PDB import PDBList, Selection, Polypeptide, vectors
 from Bio.PDB.PDBParser import PDBParser
-from pandas.core.algorithms import value_counts
 
 from hyprotein.libs.interface import Interface
 
@@ -26,8 +25,10 @@ class Biopython(Interface):
         for chain in self.lib.get_chains():
             c = chain.id
             residues = list(chain.get_residues())
-            protein[pdb][c] = {res.id[1]: {'residue': res.resname}
-                                for res in residues}
+            protein[pdb][c] = {res.id[1]: {
+                'RESIDUE': res.resname,
+                'HET': res.id[0]
+                } for res in residues}
         return protein
 
     def show(self):
@@ -41,7 +42,7 @@ class Biopython(Interface):
             residues = chain.get_residues()
             c = chain.id
             for res in residues:
-                #Verifying if res is not a HETATM
+                #Verify if res is a HETATM
                 if res.id[0].strip():
                     ...
                 else:
@@ -54,16 +55,26 @@ class Biopython(Interface):
                     psi = res.internal_coord.get_angle('psi')
                     psi = round(psi, 5) if isinstance(psi, float) else psi
 
+                    # _res = res.__class__.__repr__
+                    # res.__class__.__repr__ = self.__repr(res)
+
                     protein[pdb][c][r] = {
-                        'residue': res.resname,
+                        'RESIDUE': res.resname,
+                        'HET': res.id[0],
                         'phi': phi,
                         'psi': psi
                     }
+
+                    # res.__class__.__repr__ = _res
+
         return protein
 
     def set_angle(self, chain, res_id, angle_key, value):
         self.residues.get(chain,res_id).internal_coord.set_angle(
             angle_key, value)
+
+    def __repr(self,res):
+        return lambda r: f"{res.resname}"
             
     class Residues:
         def __init__(self, lib) -> None:

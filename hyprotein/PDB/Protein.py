@@ -1,5 +1,5 @@
-from .PDBstructure import PDBstructure
-from .PDBobject import PDBobject
+from .PDBStructure import Structure
+from .PDBObject import PDBobject
 from hyprotein import _utils
 from hyprotein.simulation import simulation
 
@@ -8,7 +8,7 @@ class Protein(PDBobject):
     Protein class
     =============
     
-    Protein class handles with PDB objects creation.
+    Protein class to handle PDB objects.
     
     Arguments
         pdb (list): list of the PDB files names
@@ -34,7 +34,7 @@ class Protein(PDBobject):
         self.lib = lib
         PDBobject.__init__(self,pdb)
 
-        self.structure = PDBstructure(pdb)
+        self.structure = Structure(pdb)
     
     def __repr__(self) -> str:
         return f"<hyProtein {self.pdb} id={self.id}>"
