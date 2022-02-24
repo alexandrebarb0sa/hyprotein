@@ -1,16 +1,22 @@
-from hyprotein.PDB.PDBObject import PDBobject
+from hyprotein.PDB.PDBObject import PDBObject
 from .PDBData import PDBData
+from hyprotein import _utils
 
-class Structure(PDBobject):
+class Structure(PDBObject):
     """
-    PDBstructure class
+    Structure class
     """
+    level = "S"
     def __init__(self,pdb):
-        self.level = "Structure"
+        # Keep this order
         self.pdb = pdb
-        # self.residues = PDBresidues.info(self.name)
-        PDBobject.__init__(self,pdb)
-        self.__lib = self.get_lib()
+        PDBObject.__init__(self,pdb)
+        #--------------------------
+
+    @property
+    def residues(self):
+        Residues = _utils.namedtuple("Residues",["pdb","total"])
+        return Residues(self.pdb,self.from_lib.residues_total)
 
     @property
     def protein(self):
@@ -18,7 +24,7 @@ class Structure(PDBobject):
             if self.__protein:
                 ...
         except AttributeError:
-            parse = self.__lib.protein
+            parse = self.from_lib.protein
             self._repr_residue(parse)
         return self.__protein
 
@@ -28,7 +34,7 @@ class Structure(PDBobject):
         chains = protein[self.pdb].keys()
         for c in chains:
             for res_id in protein[pdb][c]:
-                protein[pdb][c][res_id]['RESIDUE'] = PDBresidues(
+                protein[pdb][c][res_id]['RESIDUE'] = PDBresidue(
                     id=res_id,
                     resname=protein[pdb][c][res_id]['RESIDUE'],
                     parent=c
@@ -47,7 +53,7 @@ class Structure(PDBobject):
         """
         .dihedrals() method
         """
-        parse = self.__lib.dihedrals()
+        parse = self.from_lib.dihedrals()
         self._repr_residue(parse)
 
         view = PDBData(self.protein).pandas()
@@ -63,10 +69,22 @@ class Structure(PDBobject):
                   ]
         return ' '.join(prompt)
 
+    def __str__(self) -> str:
+        chains = list(self.protein[self.pdb].keys())
+        propmt = [f"<Structure {self.pdb}: ",
+            f"Chains={chains} ",
+            f"Residues={self.from_lib.residues_total}",
+            ">"                        
+        ]
+        return "".join(propmt)
 
-class PDBresidues:
+    def __repr__(self) -> str:
+        return self.__str__()
+
+
+class PDBresidue(PDBObject):
     """
-    PDBresidues class
+    PDBresidue class
     """
 
     def __init__(self, *args,**kwargs) -> None:
@@ -88,7 +106,7 @@ class PDBresidues:
         ...
 
     def __str__(self) -> str:
-        return f"{self.resname}"
+        return f"<Residue {self.resname} id: {self.id}>"
 
     def __repr__(self) -> str:
-        return f"<Residue {self.resname} id: {self.id}>"
+        return f"{self.resname}"

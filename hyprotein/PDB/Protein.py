@@ -1,9 +1,9 @@
 from .PDBStructure import Structure
-from .PDBObject import PDBobject
+from .PDBObject import PDBObject
 from hyprotein import _utils
 from hyprotein.simulation import simulation
 
-class Protein(PDBobject):
+class Protein(PDBObject):
     """ 
     Protein class
     =============
@@ -14,6 +14,7 @@ class Protein(PDBobject):
         pdb (list): list of the PDB files names
         lib (str): lib used to handle PDB files, e.g: biopythom, gromacsaa, etc
     """
+    level = "Protein"
     def __new__(cls, pdb:list = None,pdb_dir:str = None, lib:str = None):
         if pdb is None:
             prompt = "Protein class needs three parameters to initialize:"
@@ -28,11 +29,11 @@ class Protein(PDBobject):
         return proteins
 
     def __init__(self, pdb:list,pdb_dir:str,lib:str) -> None:
-        self.level = "Protein"
         self.pdb = pdb
         self.pdb_dir = _utils.os.path.abspath(pdb_dir)
         self.lib = lib
-        PDBobject.__init__(self,pdb)
+
+        PDBObject.__init__(self,pdb)
 
         self.structure = Structure(pdb)
     

@@ -5,6 +5,7 @@ import yaml
 import json
 from types import SimpleNamespace
 from rich.console import Console
+from collections import namedtuple
 
 console = Console()
 

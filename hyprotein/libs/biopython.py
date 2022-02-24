@@ -5,14 +5,14 @@ from Bio.PDB.PDBParser import PDBParser
 from hyprotein.libs.interface import Interface
 
 class Biopython(Interface):
+    __version__ = ['Biopython', Bio_version]
+    lib = "biopython"
     def __init__(self, pdb, pdb_dir, pdb_format=".pdb") -> None:
-        self.__version__ = ['Biopython', Bio_version]
-        self.lib_name = 'biopython'
         self.pdb = pdb
         self.dir = f"{pdb_dir}/{pdb}{pdb_format}"
-        self.lib = PDBParser().get_structure(self.pdb, self.dir)[0]
-        self.lib.atom_to_internal_coordinates()
-        self.residues = None
+        self.__lib = PDBParser().get_structure(self.pdb, self.dir)[0]
+        self.__lib.atom_to_internal_coordinates()
+        self.residues_total = len(list(self.__lib.get_residues()))
         # self.residues.get(id,chain)
 
     @property
@@ -20,10 +20,10 @@ class Biopython(Interface):
         pdb = self.pdb
         protein = {
             pdb: {
-                chain.id: None for chain in list(self.lib.get_chains())
+                chain.id: None for chain in list(self.__lib.get_chains())
             }
         }
-        for chain in self.lib.get_chains():
+        for chain in self.__lib.get_chains():
             c = chain.id
             _residues = list(chain.get_residues())
             protein[pdb][c] = {res.id[1]: {
@@ -39,7 +39,7 @@ class Biopython(Interface):
         protein = self.protein
         pdb = self.pdb
 
-        for chain in self.lib.get_chains():
+        for chain in self.__lib.get_chains():
             residues = chain.get_residues()
             c = chain.id
             for res in residues:
@@ -75,15 +75,15 @@ class Biopython(Interface):
             angle_key, value)
 
     def __repr(self,res):
-        return lambda r: f"{res.resname}"
+        return lambda res: f"{res.resname}"
             
     class Residues:
         def __init__(self, lib) -> None:
-            self.lib = lib
-            self.total = len(list(self.lib.get_residues()))
+            self.__lib = lib
+            self.total = len(list(self.__lib.get_residues()))
 
         def repr(self, chain, id):
-            for res in self.lib.child_dict[chain]:
+            for res in self.__lib.child_dict[chain]:
                 if id in res.id:
                     attr = {
                         'resname': res.resname,
@@ -93,6 +93,6 @@ class Biopython(Interface):
                     return attr
 
         def get(self,chain,res_id):
-            for res in self.lib.child_dict[chain]:
+            for res in self.__lib.child_dict[chain]:
                 if res_id in res.id:
                     return res

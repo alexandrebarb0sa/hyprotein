@@ -8,4 +8,5 @@ p = hyp.Protein(
     lib='biopython'
 )
 
-r = p['1le0'].structure.dihedrals()
+r = p['1vii'].structure.show().loc['1vii','A',41].values
+print(r)

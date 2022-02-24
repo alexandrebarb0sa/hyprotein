@@ -1,9 +1,9 @@
 import pandas as pd
 
 class PDBData:
-    def __init__(self, pdb) -> None:
-        self.pdb = pdb
-        self.protein = list(self.pdb.keys())[0]
+    def __init__(self, protein) -> None:
+        self.protein = protein
+        self.pdb = list(self.protein.keys())[0]
 
     def to_dict(self):
         if isinstance(self.pdb, dict):
@@ -12,20 +12,20 @@ class PDBData:
     def pandas(self):
         pdb, protein = self.pdb, self.protein
         # pdb[protein].update({'B':dict(list(pdb[protein]['A'].items())[0:5])})
-        chains = list(pdb[protein].keys())
-        columns = list(list(pdb[protein][chains[0]].values())[0].keys())
+        chains = list(protein[pdb].keys())
+        columns = list(list(protein[pdb][chains[0]].values())[0].keys())
 
         idx = {chain: None for chain in chains}
         res = {chain: None for chain in chains}
 
         for chain in chains:
-            id = pdb[protein][chain].keys()
-            res[chain] = pdb[protein][chain].values()
+            id = protein[pdb][chain].keys()
+            res[chain] = protein[pdb][chain].values()
 
             idx[chain] = pd.MultiIndex.from_product([list(chain), id])
 
             idx[chain] = [
-                (protein,) + x for x in idx[chain].values
+                (pdb,) + x for x in idx[chain].values
             ]
 
             idx[chain] = pd.Index(idx[chain])
