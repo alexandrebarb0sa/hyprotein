@@ -8,5 +8,8 @@ p = hyp.Protein(
     lib='biopython'
 )
 
-r = p['1vii'].structure.show().loc['1vii','A',41].values
-print(r)
+s = p['1vii'].structure
+res = s.residues.loc['1vii']
+
+print(s.set_angle('A',41,'psi',0))
+print(s.get_angle('A',41,'psi'))

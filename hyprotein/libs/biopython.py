@@ -10,36 +10,35 @@ class Biopython(Interface):
     def __init__(self, pdb, pdb_dir, pdb_format=".pdb") -> None:
         self.pdb = pdb
         self.dir = f"{pdb_dir}/{pdb}{pdb_format}"
-        self.__lib = PDBParser().get_structure(self.pdb, self.dir)[0]
-        self.__lib.atom_to_internal_coordinates()
-        self.residues_total = len(list(self.__lib.get_residues()))
+        self.biopython = PDBParser().get_structure(self.pdb, self.dir)[0]
+        self.biopython.atom_to_internal_coordinates()
+        self.residues = self.Residues(self.biopython)
+        self.residues_total = len(list(self.biopython.get_residues()))
         # self.residues.get(id,chain)
 
+    # Represents protein in dict form
     @property
     def protein(self):
         pdb = self.pdb
         protein = {
             pdb: {
-                chain.id: None for chain in list(self.__lib.get_chains())
+                chain.id: None for chain in list(self.biopython.get_chains())
             }
         }
-        for chain in self.__lib.get_chains():
+        for chain in self.biopython.get_chains():
             c = chain.id
             _residues = list(chain.get_residues())
             protein[pdb][c] = {res.id[1]: {
-                'RESIDUE': res.resname,
-                'HET': res.id[0]
+                'res': res.resname,
+                'het': res.id[0]
                 } for res in _residues}
         return protein
-
-    def show(self):
-        ...
 
     def dihedrals(self):
         protein = self.protein
         pdb = self.pdb
 
-        for chain in self.__lib.get_chains():
+        for chain in self.biopython.get_chains():
             residues = chain.get_residues()
             c = chain.id
             for res in residues:
@@ -60,8 +59,8 @@ class Biopython(Interface):
                     # res.__class__.__repr__ = self.__repr(res)
 
                     protein[pdb][c][r] = {
-                        'RESIDUE': res.resname,
-                        'HET': res.id[0],
+                        'res': res.resname,
+                        'het': res.id[0],
                         'phi': phi,
                         'psi': psi
                     }
@@ -74,16 +73,20 @@ class Biopython(Interface):
         self.residues.get(chain,res_id).internal_coord.set_angle(
             angle_key, value)
 
+    def get_angle(self, chain, res_id, angle_key):
+        return self.residues.get(chain, res_id).internal_coord.get_angle(
+            angle_key)
+
     def __repr(self,res):
         return lambda res: f"{res.resname}"
             
     class Residues:
         def __init__(self, lib) -> None:
-            self.__lib = lib
-            self.total = len(list(self.__lib.get_residues()))
+            self.biopython = lib
+            self.total = len(list(self.biopython.get_residues()))
 
         def repr(self, chain, id):
-            for res in self.__lib.child_dict[chain]:
+            for res in self.biopython.child_dict[chain]:
                 if id in res.id:
                     attr = {
                         'resname': res.resname,
@@ -93,6 +96,6 @@ class Biopython(Interface):
                     return attr
 
         def get(self,chain,res_id):
-            for res in self.__lib.child_dict[chain]:
+            for res in self.biopython.child_dict[chain]:
                 if res_id in res.id:
                     return res

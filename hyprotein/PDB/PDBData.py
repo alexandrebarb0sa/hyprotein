@@ -14,6 +14,7 @@ class PDBData:
         # pdb[protein].update({'B':dict(list(pdb[protein]['A'].items())[0:5])})
         chains = list(protein[pdb].keys())
         columns = list(list(protein[pdb][chains[0]].values())[0].keys())
+        # columns = [item.upper() for item in columns]
 
         idx = {chain: None for chain in chains}
         res = {chain: None for chain in chains}
@@ -40,5 +41,5 @@ class PDBData:
         data = [d.values() for d in data]
 
         df = pd.DataFrame(data=data, columns=columns, index=idx)
-
+        
         return df
