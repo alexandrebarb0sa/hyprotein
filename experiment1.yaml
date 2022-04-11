@@ -1,17 +1,20 @@
-root: simulation
+path: &path "./simulation"
 experiment:
-  name: "experiment1"
+  name: &experiment "experiment1"
+  dir: [*path,*experiment]
+proteins:
+  dir: [*path,"pdbs"]
+  pdb: ['1vii','1le0','1fsd']
+  lib: "biopython"
+MD:
+  dir: [*path,"mdp"]
+  runs: []
+  property: ['POT','RG']
+  temperature: 298
   analysis:
-    dir: "analysis"
+    dir: [*path,*experiment,"analysis"]
     logs:
       - file: "log.dat"
       - steps: 100
   outputs:
-    dir: "outputs"  
-proteins:
-  dir: "../pdbs"
-  pdbs: ['1vii','1le0','1fsd']
-MD:
-  dir: "mdp"
-  run: []
-  temperature: 298
+    dir: [*path,*experiment,"outputs"]

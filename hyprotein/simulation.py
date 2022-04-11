@@ -3,20 +3,18 @@ from . import _utils
 simulation = dict()
 
 # Private method
-def _setup(config):
+def _config(cfg):
     global simulation
-    if '.yaml' not in config:
-        config = f"{config}.yaml"
-    with open(config) as stream:
-        simulation.update({
-            'config': _utils.yaml.safe_load(stream)
-        })
-    simulation = _utils.json.loads(_utils.json.dumps(simulation['config']),
-                            object_hook=lambda item: _utils.SimpleNamespace(**item))
+    if '.yaml' not in cfg:
+        cfg = f"{cfg}.yaml"
+    with open(cfg) as stream:
+        simulation.update(_utils.yaml.safe_load(stream))
+        simulation = _utils.json.loads(_utils.json.dumps(simulation),
+                        object_hook=lambda item: _utils.SimpleNamespace(**item))
 
-def create(config, mode=0o700, permission=True, silent=True):
+def setup(cfg, mode=0o700, permission=True, silent=True):
     """
-    Create a current workspace for running simulations. The default workspace tree is:
+    Setup the current workspace for running simulations. The default workspace tree is:
 
     [Simulation's tree structure]
 
@@ -31,9 +29,9 @@ def create(config, mode=0o700, permission=True, silent=True):
     │           ├── analysis
     │           └── outputs    
 
-    :param config: Workspace tree directory
-    :type config: YAML configuration file, with or without extension declared.
-    :type config: str
+    :param cfg: Workspace tree directory
+    :type cfg: YAML configuration file, with or without extension declared.
+    :type cfg: str
     :param mode: File octal mode, like chmod options for read, write and execute
     :type mode: octal permission, default: 0o700 (file owner has perssion to read, write and execute)
     :param permission: boolean value to allow weather or not it has permisison to change file's mode of read, write and execute
@@ -42,29 +40,29 @@ def create(config, mode=0o700, permission=True, silent=True):
 
     global simulation
     if not simulation:
-        _setup(config)
+        _config(cfg)
 
-    path = {
-        'proteins': simulation.proteins.dir,
-        'MD': simulation.MD.dir,
+    paths = {
+        'proteins': _utils.os.path.normpath(_utils.os.path.join(*simulation.proteins.dir)),
+        'MD': _utils.os.path.normpath(_utils.os.path.join(*simulation.MD.dir)),
         'experiment': {
-            'dir': simulation.experiment.name,
-            'analysis': _utils.os.path.join(simulation.experiment.name,simulation.experiment.analysis.dir),
-            'outputs': _utils.os.path.join(simulation.experiment.name,simulation.experiment.outputs.dir)
+            'dir': _utils.os.path.normpath(_utils.os.path.join(*simulation.experiment.dir)),
+            'analysis': _utils.os.path.normpath(_utils.os.path.join(*simulation.MD.analysis.dir)),
+            'outputs': _utils.os.path.normpath(_utils.os.path.join(*simulation.MD.outputs.dir)),
         }
     }
 
     local = _utils.os.getcwd()
     user_mode = _utils.os.umask(000)
     if permission:
-        _utils.os.makedirs(simulation.root, mode, exist_ok=True)
-        _utils.os.chdir(simulation.root)
-        _utils.os.makedirs(path['proteins'], mode, exist_ok=True)
-        _utils.os.makedirs(path['MD'], mode, exist_ok=True)
+        _utils.os.makedirs(simulation.path, mode, exist_ok=True)
+        _utils.os.chdir(simulation.path)
+        _utils.os.makedirs(paths['proteins'], mode, exist_ok=True)
+        _utils.os.makedirs(paths['MD'], mode, exist_ok=True)
         try:
-            _utils.os.makedirs(path['experiment']['dir'], mode, exist_ok=False)
-            _utils.os.makedirs(path['experiment']['analysis'], mode, exist_ok=True)
-            _utils.os.makedirs(path['experiment']['outputs'], mode, exist_ok=True)
+            _utils.os.makedirs(paths['experiment']['dir'], mode, exist_ok=False)
+            _utils.os.makedirs(paths['experiment']['analysis'], mode, exist_ok=True)
+            _utils.os.makedirs(paths['experiment']['outputs'], mode, exist_ok=True)
         except FileExistsError as err:
             if not silent:
                 prompt = "Simulation directory already exists! Skipping..."
@@ -73,16 +71,16 @@ def create(config, mode=0o700, permission=True, silent=True):
         _utils.os.umask(user_mode)
         _utils.os.chdir(local)
 
-def clear(config=None):
+def clear(cfg=None):
     """
     Clean up the folder of the current experiment.
-    :type config: YAML configuration file, with or without extension declared.
-    :type config: str
+    :type cfg: YAML configuration file, with or without extension declared.
+    :type cfg: str
     """
     global simulation
     if simulation:
         try:
-            path = _utils.os.path.join(simulation.root,simulation.experiment.name)
+            path = _utils.os.path.normpath(_utils.os.path.join(*simulation.experiment.dir))
             prompt = "Confirm to clean up the experiment folder [y/n]: "
             _utils.info()
             opt = input(prompt)
@@ -98,12 +96,12 @@ def clear(config=None):
             prompt = 'Simulation directory not found!\n'
             _utils.warning(prompt)
     else:
-        if config:
-            _setup(config)
-            clear(config)
+        if cfg:
+            _config(cfg)
+            clear(cfg)
         else:
-            config = input('YAML configuration file: ')
-            clear(config)
+            cfg = input('YAML configuration file: ')
+            clear(cfg)
 
 def run():
     return 'run'

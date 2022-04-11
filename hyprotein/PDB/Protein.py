@@ -34,6 +34,7 @@ class Protein(PDBObject):
         self.parent = None
         PDBObject.__init__(self)
         self.structure = Structure(id)
+        self.property = None
   
     def __repr__(self) -> str:
         return f"<hyProtein {self.id}>"
