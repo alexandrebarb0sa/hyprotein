@@ -6,11 +6,12 @@ from hyprotein.libs.interface import Interface
 
 class Biopython(Interface):
     __version__ = ['Biopython', Bio_version]
-    lib = "biopython"
-    def __init__(self, pdb, pdb_dir, pdb_format=".pdb") -> None:
-        self.pdb = pdb
-        self.dir = f"{pdb_dir}/{pdb}{pdb_format}"
-        self.biopython = PDBParser().get_structure(self.pdb, self.dir)[0]
+    libname = "biopython"
+    def __init__(self, id, **kwargs) -> None:
+        self.id = id
+        pdb_format = kwargs.get('pdb_format','pdb')
+        dir = f"{kwargs.get('dir')}/{id}.{pdb_format}"
+        self.biopython = PDBParser().get_structure(self.id, dir)[0]
         self.biopython.atom_to_internal_coordinates()
         self.residues = self.Residues(self.biopython)
         self.residues_total = len(list(self.biopython.get_residues()))
@@ -18,8 +19,8 @@ class Biopython(Interface):
 
     # Represents protein in dict form
     @property
-    def protein(self):
-        pdb = self.pdb
+    def protein2dict(self):
+        pdb = self.id
         protein = {
             pdb: {
                 chain.id: None for chain in list(self.biopython.get_chains())
@@ -35,8 +36,8 @@ class Biopython(Interface):
         return protein
 
     def dihedrals(self):
-        protein = self.protein
-        pdb = self.pdb
+        protein = self.protein2dict
+        pdb = self.id
 
         for chain in self.biopython.get_chains():
             residues = chain.get_residues()

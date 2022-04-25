@@ -2,4 +2,4 @@ from hyprotein.PDB.PDBLib import PDBlib
 from .biopython import Biopython
 
 lib = PDBlib()
-lib.register("biopython", Biopython)
+lib.register("biopython",libtype='PDB',source=Biopython)

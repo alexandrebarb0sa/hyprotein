@@ -1,10 +1,8 @@
 from hyprotein.libs import lib
 
 class PDBObject:
-    def __init__(self,id=None) -> None:
-        if id:
-            self.id = id
-        self.lib = lib.get(self.id)
+    def __init__(self,**kwargs) -> None:
+        self.pdb = lib.get(self.id,'PDB',**kwargs)
 
     def get_level(self):
         return self.level
@@ -16,3 +14,6 @@ class PDBObject:
     def get_parent(self):
         """Return the parent Entity object."""
         return self.parent
+
+
+

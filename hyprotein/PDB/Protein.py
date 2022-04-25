@@ -12,29 +12,24 @@ class Protein(PDBObject):
     Protein class to handle PDB objects.
     
     Arguments
-        pdb (list): list of the PDB files names
-        lib (str): lib used to handle PDB files, e.g: biopython, gromacs, etc
+        PDB (dict): ...
+        MD (dic): ...
     """
-    def __new__(cls, pdb:list = None,pdb_dir:str = None, pdb_lib:str = None):
-        if pdb is None:
-            prompt = "Protein class needs three parameters to initialize:"
-            _utils.warning(prompt)
+    def __new__(cls,PDB,**kwargs):
         proteins = dict()
-        for p in pdb:
+        for p in PDB['pdb']:
             instance = super(Protein, cls).__new__(cls)
-            instance.__init__(p,pdb_dir,pdb_lib)
+            instance.__init__(p,dir=PDB['dir'],lib=PDB['lib'])
             proteins.update({
-                p: instance
+                p:instance
             })
         return proteins
 
-    def __init__(self, pdb:str,pdb_dir:str,pdb_lib:str):
-        lib.init(pdb, pdb_dir, pdb_lib)
-        self.id = id = pdb
+    def __init__(self,id,**kwargs):
+        self.id = id
         self.parent = None
-        PDBObject.__init__(self)
-        self.structure = Structure(id)
-        self.property = None
+        PDBObject.__init__(self,**kwargs)
+        self.structure = Structure(id,**kwargs)
   
     def __repr__(self) -> str:
         return f"<hyProtein {self.id}>"
