@@ -10,7 +10,6 @@ MD:
   dir: [*path,"mdp"]
   runs: []
   property: ['POT','RG']
-  temperature: 298
   analysis:
     dir: [*path,*experiment,"analysis"]
     logs:

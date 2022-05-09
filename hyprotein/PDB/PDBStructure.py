@@ -43,6 +43,9 @@ class Structure(PDBObject):
     def get_angle(self, chain, res_id, angle_key):
         return self.pdb.get_angle(chain,res_id,angle_key)
 
+    def get_property(self,propery=None,mdp=None):
+        ...
+
     def __str__(self) -> str:
         chains = list(self.pdb.protein2dict[self.id].keys())
         propmt = [f"<Structure {self.id}: ",

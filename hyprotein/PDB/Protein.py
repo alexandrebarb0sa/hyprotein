@@ -19,7 +19,7 @@ class Protein(PDBObject):
         proteins = dict()
         for p in PDB['pdb']:
             instance = super(Protein, cls).__new__(cls)
-            instance.__init__(p,dir=PDB['dir'],lib=PDB['lib'])
+            instance.__init__(p,dir=PDB['dir'],lib=PDB['lib'],MD=kwargs.get('MD'))
             proteins.update({
                 p:instance
             })
