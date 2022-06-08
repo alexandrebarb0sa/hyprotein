@@ -1,35 +1,32 @@
-from hyprotein.libs import lib
-from .PDBStructure import Structure
-from .PDBObject import PDBObject
-from hyprotein import _utils
-from hyprotein.simulation import simulation
+from hyprotein.PDB.PDBObject import PDBObject
+from hyprotein.PDB.PDBStructure import Structure
+from hyprotein.MD.MD import MD
 
-class Protein(PDBObject):
-    """ 
-    Protein class
-    =============
-    
-    Protein class to handle PDB objects.
-    
-    Arguments
-        PDB (dict): ...
-        MD (dic): ...
-    """
-    def __new__(cls,PDB,**kwargs):
-        proteins = dict()
-        for p in PDB['pdb']:
-            instance = super(Protein, cls).__new__(cls)
-            instance.__init__(p,dir=PDB['dir'],lib=PDB['lib'],MD=kwargs.get('MD'))
-            proteins.update({
-                p:instance
-            })
-        return proteins
+class Protein(MD,PDBObject):
+    def __new__(cls,id=None,**kwargs):
+        pdbs = kwargs.get('pdb')
+        kwargs.pop('pdb')
+        if pdbs:
+            dir = kwargs.get('dir')
+            lib,version = kwargs.get('lib'), kwargs.get('version')
+            proteins = dict()
+            for id in pdbs:
+                instance = super(Protein, cls).__new__(cls)
+                instance.__init__(id=id,**kwargs)
+                proteins.update({
+                    id: instance
+                })
+            return proteins
+        else:
+            return super(Protein,cls).__new__(cls)
 
-    def __init__(self,id,**kwargs):
-        self.id = id
+    level = 'P'
+    def __init__(self,id=None,**kwargs) -> None:
         self.parent = None
+        self.id = id
+        self.dir = kwargs['dir']
         PDBObject.__init__(self,**kwargs)
         self.structure = Structure(id,**kwargs)
-  
+
     def __repr__(self) -> str:
         return f"<hyProtein {self.id}>"

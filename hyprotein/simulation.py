@@ -2,6 +2,11 @@ from . import _utils
 
 simulation = dict()
 
+def init(protein, simulation):
+    protein.update(dict(
+        simulation=simulation
+    ))
+
 # Private method
 def _config(cfg):
     global simulation

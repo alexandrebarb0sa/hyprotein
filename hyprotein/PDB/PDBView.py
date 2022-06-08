@@ -1,6 +1,6 @@
 import pandas as pd
 
-class PDBData:
+class PDBView:
     def __init__(self, protein) -> None:
         self.protein = protein
         self.pdb = list(self.protein.keys())[0]

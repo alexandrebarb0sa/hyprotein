@@ -1,6 +1,5 @@
 from hyprotein.PDB.PDBObject import PDBObject
-from .PDBData import PDBData
-from hyprotein import _utils
+from .PDBView import PDBView
 
 class Structure(PDBObject):
     """
@@ -10,28 +9,29 @@ class Structure(PDBObject):
     def __init__(self,id,**kwargs):
         self.id = id
         PDBObject.__init__(self,**kwargs)
+        self.__lib = self.lib
+        del(self.lib)
 
-    @property
-    def residues(self):
+    def get_residues(self):
         try:
             if self.__protein:
-                return PDBData(self.__protein).pandas()
+                return PDBView(self.__protein).pandas()
         except AttributeError:
-            protein = self.__repr__(self.pdb.protein2dict)
+            protein = self.__repr__(self.__lib.protein2dict)
             self.__protein = protein
-            return PDBData(self.__protein).pandas()
+            return PDBView(self.__protein).pandas()
 
-    def dihedrals(self):
+    def get_dihedrals(self):
         """
-        .dihedrals() method
+        .get_dihedrals() method
         """
-        protein = self.pdb.dihedrals()
+        protein = self.__lib.dihedrals()
         protein = self.__repr__(protein)
-        view = PDBData(protein).pandas()
+        view = PDBView(protein).pandas()
         return view
 
     def set_angle(self, chain, res_id, angle_key, value):
-        self.pdb.set_angle(chain, res_id, angle_key, value)
+        self.__lib.set_angle(chain, res_id, angle_key, value)
         prompt = [f"<hyProtein:",
                   f"{self.id.upper()}",
                   f"Chain: {chain}",
@@ -41,16 +41,16 @@ class Structure(PDBObject):
         return ' '.join(prompt)
 
     def get_angle(self, chain, res_id, angle_key):
-        return self.pdb.get_angle(chain,res_id,angle_key)
+        return self.__lib.get_angle(chain,res_id,angle_key)
 
     def get_property(self,propery=None,mdp=None):
         ...
 
     def __str__(self) -> str:
-        chains = list(self.pdb.protein2dict[self.id].keys())
+        chains = list(self.__lib.protein2dict[self.id].keys())
         propmt = [f"<Structure {self.id}: ",
             f"Chains={chains} ",
-            f"Residues={self.pdb.residues_total}",
+            f"Residues={self.__lib.residues_total}",
             ">"                        
         ]
         return "".join(propmt)
@@ -65,7 +65,7 @@ class Structure(PDBObject):
                         id = r,
                         resname=protein[id][c][r]['res'],
                         parent = c,
-                        pdb=self.pdb                                                                       
+                        pdb=self.__lib                                                                       
                     )
             return protein
         else:
@@ -78,19 +78,19 @@ class PDBresidue:
     level = "R"
     def __init__(self,id,resname,parent,pdb) -> None:
         self.id = id
-        self.pdb = pdb
+        self.__lib = pdb
         self.resname = resname
         self.parent = parent
 
     def set_angle(self,angle_key,value):
-        self.pdb.set_angle(self.parent,self.id,angle_key,value)
+        self.__lib.set_angle(self.parent,self.id,angle_key,value)
 
     def get_angle(self,angle_key):
-        return self.pdb.get_angle(self.parent,self.id,angle_key)
+        return self.__lib.get_angle(self.parent,self.id,angle_key)
 
     def phi_psi(self):
-        phi = self.pdb.get_angle(self.parent, self.id,'phi')
-        psi = self.pdb.get_angle(self.parent, self.id, 'psi')
+        phi = self.__lib.get_angle(self.parent, self.id,'phi')
+        psi = self.__lib.get_angle(self.parent, self.id, 'psi')
         return (phi,psi)
 
     def __repr__(self) -> str:

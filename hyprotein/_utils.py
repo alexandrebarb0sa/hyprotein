@@ -7,6 +7,7 @@ import subprocess
 from types import SimpleNamespace
 from rich.console import Console
 from collections import namedtuple
+from packaging import version
 
 console = Console()
 

@@ -1,4 +1,3 @@
-from . import simulation
-from .PDB import *
+from .PDB.Protein import *
 
-__version__ = "2.0.0"
+__version__ = "1.0.0"

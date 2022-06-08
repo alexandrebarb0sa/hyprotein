@@ -11,10 +11,10 @@ class Biopython(Interface):
         self.id = id
         pdb_format = kwargs.get('pdb_format','pdb')
         dir = f"{kwargs.get('dir')}/{id}.{pdb_format}"
-        self.biopython = PDBParser().get_structure(self.id, dir)[0]
-        self.biopython.atom_to_internal_coordinates()
-        self.residues = self.Residues(self.biopython)
-        self.residues_total = len(list(self.biopython.get_residues()))
+        self.api = PDBParser().get_structure(self.id, dir)[0]
+        self.api.atom_to_internal_coordinates()
+        self.residues = self.Residues(self.api)
+        self.residues_total = len(list(self.api.get_residues()))
         # self.residues.get(id,chain)
 
     # Represents protein in dict form
@@ -23,10 +23,10 @@ class Biopython(Interface):
         pdb = self.id
         protein = {
             pdb: {
-                chain.id: None for chain in list(self.biopython.get_chains())
+                chain.id: None for chain in list(self.api.get_chains())
             }
         }
-        for chain in self.biopython.get_chains():
+        for chain in self.api.get_chains():
             c = chain.id
             _residues = list(chain.get_residues())
             protein[pdb][c] = {res.id[1]: {
@@ -39,7 +39,7 @@ class Biopython(Interface):
         protein = self.protein2dict
         pdb = self.id
 
-        for chain in self.biopython.get_chains():
+        for chain in self.api.get_chains():
             residues = chain.get_residues()
             c = chain.id
             for res in residues:
@@ -83,11 +83,11 @@ class Biopython(Interface):
             
     class Residues:
         def __init__(self, lib) -> None:
-            self.biopython = lib
-            self.total = len(list(self.biopython.get_residues()))
+            self.api = lib
+            self.total = len(list(self.api.get_residues()))
 
         def repr(self, chain, id):
-            for res in self.biopython.child_dict[chain]:
+            for res in self.api.child_dict[chain]:
                 if id in res.id:
                     attr = {
                         'resname': res.resname,
@@ -97,6 +97,6 @@ class Biopython(Interface):
                     return attr
 
         def get(self,chain,res_id):
-            for res in self.biopython.child_dict[chain]:
+            for res in self.api.child_dict[chain]:
                 if res_id in res.id:
                     return res

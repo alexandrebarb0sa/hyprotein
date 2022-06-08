@@ -1,1 +1,1 @@
-from .Protein import Protein
+from . import Protein
